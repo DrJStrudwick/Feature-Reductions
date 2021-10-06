@@ -24,20 +24,16 @@ def subgroups(correlated):
             subgroups.append(pick)                 #add the number we have picked to the list
     return subgroups                         #return the grouping we have created
 
-def corrWeights(subgroups,min_c=0.5):
+def corrWeights(subgroups):
     """
     For the list of subgroups provided is shall randomly generate numbers whose absolute value are in the range [0.5,1) to serve as the seeding correlation value
     """
     
-    if min_c<0.5 or min_c>=1:
-        raise ValueError('min_c must be less than 1 and greater than 0.5')
-    
     weights=[]                           #init the list to hold the correlations for each grouping
     for size in subgroups:               #for each grouping
         w = rand(size-1)-0.5                #generate random floats between [-0.5,0.5] 
-        w = w*((1-min_c)/0.5)                 #scale to range we need
-        w[w<0]-=min_c                         #any that are negative shift so they are in [-1,-min_c]
-        w[w>0]+=min_c                         #any that are positive shift so they are in [min_c,1]
+        w[w<0]-=0.5                         #any that are negative shift so they are in [-1.-0.5]
+        w[w>0]+=0.5                         #any that are positive shift so they are in [0.5,1]
         weights.append(list(w))             #append to our list
     return weights                       #return weights
 
@@ -97,7 +93,7 @@ def createTarget(data):
     return data, coeffs
 
 
-def genSynthData(samples=400,features=10,correlated=5,min_c=0.5):
+def genSynthData(samples=400,features=10,correlated=5):
     """
     create a whole synthetic dataset with the structure that we require.
     """
@@ -107,7 +103,7 @@ def genSynthData(samples=400,features=10,correlated=5,min_c=0.5):
         raise ValueError("Number of correlated features must be greater than 1 and less than the number of features")
     
     groups = subgroups(correlated)                                  #create the subgroupings
-    weights = corrWeights(groups,min_c)                                   #generate the correlation weights in each group
+    weights = corrWeights(groups)                                   #generate the correlation weights in each group
     data_df = genData(samples,groups,weights,correlated,features)   #generate the data
     data_df,coeffs = createTarget(data_df)                          #add target variable
     
